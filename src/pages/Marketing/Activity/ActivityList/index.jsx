@@ -103,27 +103,28 @@ const ActivityList = () => {
       title: '活动编号',
       dataIndex: 'id',
       key: 'id',
-      width: 100,
+      width: 80,
     },
     {
       title: '活动名称',
       dataIndex: 'activityName',
       key: 'activityName',
-      width: 180,
+      ellipsis: true,
     },
     {
       title: '话题名称',
       dataIndex: 'topicName',
       key: 'topicName',
-      width: 120,
+      width: 100,
+      ellipsis: true,
     },
     {
       title: '活动时间',
       dataIndex: 'activityTime',
       key: 'activityTime',
-      width: 220,
+      width: 170,
       render: (_, record) => (
-        <div>
+        <div style={{ whiteSpace: 'nowrap' }}>
           <div>{record.startTime}</div>
           <div style={{ color: '#999' }}>~</div>
           <div>{record.endTime}</div>
@@ -134,27 +135,27 @@ const ActivityList = () => {
       title: '活动状态',
       dataIndex: 'status',
       key: 'status',
-      width: 100,
+      width: 90,
       render: (status) => getStatusTag(status),
     },
     {
       title: '小程序显示状态',
       dataIndex: 'displayStatus',
       key: 'displayStatus',
-      width: 140,
+      width: 130,
       render: (displayStatus) => getDisplayStatusTag(displayStatus),
     },
     {
       title: '活动类型',
       dataIndex: 'activityType',
       key: 'activityType',
-      width: 120,
+      width: 100,
       render: (type) => ACTIVITY_TYPE_LABELS[type],
     },
     {
       title: '操作',
       key: 'action',
-      width: 200,
+      width: 160,
       render: (_, record) => (
         <Space size="small">
           <a onClick={() => handleView(record)}>查看</a>
@@ -174,60 +175,48 @@ const ActivityList = () => {
 
   return (
     <div>
-      <div style={{ marginBottom: '16px', color: '#666' }}>
-        结果：{total}条
-      </div>
       <div className="create-btn-container">
         <Button
           type="primary"
           icon={<PlusOutlined />}
-          size="large"
           onClick={handleCreateActivity}
         >
           创建活动
         </Button>
       </div>
-      <Table
-        columns={columns}
-        dataSource={activityList}
-        rowKey="id"
-        loading={loading}
-        pagination={false}
-        bordered={false}
-        style={{ background: '#fff' }}
-        rowClassName={(record, index) => index % 2 === 1 ? 'table-row-striped' : ''}
-      />
-      <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '16px' }}>
-        <Pagination
-          current={currentPage}
-          pageSize={pageSize}
-          total={total}
-          showSizeChanger
-          showQuickJumper
-          showTotal={(total) => `共 ${total} 条`}
-          onChange={(page, size) => {
-            setCurrentPage(page)
-            setPageSize(size)
-          }}
+      <div className="list-card">
+        <div className="list-result-tip">
+          结果：{total}条
+        </div>
+        <Table
+          columns={columns}
+          dataSource={activityList}
+          rowKey="id"
+          loading={loading}
+          pagination={false}
+          bordered={false}
+          rowClassName={(record, index) => index % 2 === 1 ? 'table-row-striped' : ''}
         />
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '16px' }}>
+          <Pagination
+            current={currentPage}
+            pageSize={pageSize}
+            total={total}
+            showSizeChanger
+            showQuickJumper
+            showTotal={(total) => `共 ${total} 条`}
+            onChange={(page, size) => {
+              setCurrentPage(page)
+              setPageSize(size)
+            }}
+          />
+        </div>
       </div>
       <ActivityTypeModal
         open={modalVisible}
         onCancel={() => setModalVisible(false)}
         onConfirm={handleSelectType}
       />
-      <style>{`
-        .ant-table-thead > tr > th {
-          background: #fafafa !important;
-          font-weight: 600;
-        }
-        .table-row-striped {
-          background: #fafafa;
-        }
-        .ant-table-tbody > tr:hover > td {
-          background: #e6f4ff !important;
-        }
-      `}</style>
     </div>
   )
 }

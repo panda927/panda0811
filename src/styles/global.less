@@ -1,3 +1,44 @@
+:root {
+  --primary-color: #1677FF;
+  --primary-hover: #4096FF;
+  --primary-active: #0958D9;
+  --success-color: #52C41A;
+  --warning-color: #FAAD14;
+  --error-color: #FF4D4F;
+  --text-primary: #1F2329;
+  --text-secondary: #646A73;
+  --text-tertiary: #8F959E;
+  --text-disabled: #C9CDD4;
+  --border-color: #E5E6EB;
+  --border-light: #F2F3F5;
+  --bg-page: #EBEEF2;
+  --bg-container: #FFFFFF;
+  --bg-sider: #F7F8FA;
+  --bg-hover: #F2F3F5;
+  --bg-active: #E6F4FF;
+  --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --font-size-xs: 12px;
+  --font-size-sm: 13px;
+  --font-size-base: 14px;
+  --font-size-lg: 16px;
+  --font-size-xl: 18px;
+  --font-size-xxl: 20px;
+  --border-radius-sm: 2px;
+  --border-radius-base: 4px;
+  --border-radius-lg: 6px;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.03);
+  --shadow-base: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.08);
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 12px;
+  --spacing-lg: 16px;
+  --spacing-xl: 20px;
+  --spacing-xxl: 24px;
+  --sider-width: 200px;
+  --header-height: 56px;
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -6,75 +47,266 @@
 
 html, body, #root {
   height: 100%;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+  color: var(--text-primary);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
 }
 
 body {
-  background-color: #f0f2f5;
+  background-color: var(--bg-page);
 }
 
+/* ===== 布局框架(对照 ui-standard.html) ===== */
 .app-layout {
-  height: 100vh;
+  display: flex;
+  min-height: 100vh;
 }
 
-.logo {
-  height: 48px;
+/* 侧边栏 */
+.sider {
+  width: var(--sider-width);
+  background: var(--bg-sider);
+  border-right: 1px solid var(--border-color);
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  overflow-y: auto;
+  z-index: 10;
+}
+
+.sider-logo {
+  height: var(--header-height);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
-  font-size: 18px;
+  border-bottom: 1px solid var(--border-color);
+  font-weight: 600;
+  font-size: var(--font-size-lg);
+  color: var(--text-primary);
+}
+
+.sider-logo-icon {
+  width: 28px;
+  height: 28px;
+  background: var(--primary-color);
+  border-radius: 6px;
+  margin-right: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
   font-weight: bold;
 }
 
-.site-layout-header {
-  background: #fff;
-  padding: 0 24px;
+/* 侧边栏菜单 */
+.menu {
+  padding: var(--spacing-sm) 0;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  padding: 0 var(--spacing-lg);
+  height: 40px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: var(--font-size-base);
+  position: relative;
+  user-select: none;
+  white-space: nowrap;
+
+  &:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+  }
+
+  &.active {
+    background: var(--bg-active);
+    color: var(--primary-color);
+    font-weight: 500;
+  }
+
+  &.active::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: var(--primary-color);
+  }
+}
+
+.menu-icon {
+  width: 16px;
+  margin-right: var(--spacing-md);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  line-height: 1;
+
+  .anticon {
+    font-size: 15px;
+    line-height: 1;
+  }
+}
+
+/* 子菜单容器 */
+.menu-submenu {
+  padding-left: var(--spacing-lg);
+}
+
+.menu-submenu-title {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
-}
-
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.community-name {
-  font-size: 14px;
-  color: #333;
-}
-
-.user-info {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  padding: 0 var(--spacing-lg);
+  height: 40px;
+  color: var(--text-secondary);
   cursor: pointer;
+  font-size: var(--font-size-base);
+  user-select: none;
+
+  &:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+  }
+
+  .submenu-arrow {
+    font-size: 10px;
+    transition: transform 0.2s;
+    color: var(--text-tertiary);
+
+    &.open {
+      transform: rotate(90deg);
+    }
+  }
 }
 
-.site-layout-content {
-  margin: 16px;
-  background: #fff;
-  padding: 24px;
-  min-height: calc(100vh - 112px);
-  border-radius: 4px;
+/* 子菜单项(对照规范 .menu-submenu .menu-item) */
+.menu-submenu .menu-item {
+  padding-left: calc(var(--spacing-lg) + 28px);
+  height: 36px;
+  font-size: var(--font-size-sm);
 }
 
-.breadcrumb-container {
-  margin-bottom: 16px;
+/* 主区域 */
+.main {
+  flex: 1;
+  margin-left: var(--sider-width);
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* 顶部导航 */
+.header {
+  height: var(--header-height);
+  background: var(--bg-container);
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--spacing-xl);
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+
+.header-nav {
+  display: flex;
+  gap: var(--spacing-xs);
+  height: 100%;
+  align-items: center;
+}
+
+.nav-item {
+  padding: var(--spacing-sm) var(--spacing-lg);
+  color: var(--text-secondary);
+  cursor: pointer;
+  border-radius: var(--border-radius-base);
+  font-size: var(--font-size-base);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s;
+  user-select: none;
+  white-space: nowrap;
+  line-height: 1;
+  height: 36px;
+
+  &:hover {
+    color: var(--text-primary);
+    background: var(--bg-hover);
+  }
+
+  &.active {
+    background: var(--primary-color);
+    color: white;
+  }
+
+  .anticon {
+    font-size: 16px !important;
+    display: inline-flex;
+    align-items: center;
+    line-height: 1;
+  }
+}
+
+.header-user {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.user-avatar {
+  width: 28px;
+  height: 28px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+/* 内容区 */
+.content {
+  padding: var(--spacing-xl);
+  flex: 1;
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  font-size: var(--font-size-sm);
+  color: var(--text-tertiary);
+  margin-bottom: var(--spacing-lg);
 }
 
 .content-card {
-  background: #fff;
-  border-radius: 4px;
+  background: var(--bg-container);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-sm);
 }
 
 .create-btn-container {
   display: flex;
   justify-content: flex-end;
-  margin-bottom: 16px;
+  margin-bottom: var(--spacing-lg);
 }
 
 .activity-type-modal .ant-modal-body {
@@ -220,3 +452,52 @@ body {
 .ant-btn {
   border-radius: 6px;
 }
+
+/* ===== 活动列表页 ===== */
+.list-card {
+  background: var(--bg-container);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: var(--spacing-lg) var(--spacing-xl);
+  overflow: visible;
+}
+
+.list-result-tip {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-lg);
+}
+
+.table-row-striped {
+  background: #fafafa;
+}
+
+.ant-table-wrapper {
+  background: #fff;
+  border-radius: var(--border-radius-lg);
+}
+
+.ant-table-thead > tr > th {
+  background: var(--bg-sider) !important;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  font-size: var(--font-size-base);
+}
+
+.ant-table-tbody > tr > td {
+  font-size: var(--font-size-base);
+}
+
+.ant-table-tbody > tr:hover > td {
+  background: var(--bg-active) !important;
+}
+
+.ant-table {
+  font-size: var(--font-size-base);
+}
+
+.ant-pagination {
+  margin-top: var(--spacing-lg) !important;
+}
+
