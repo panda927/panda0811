@@ -1,0 +1,1324 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>微盟社区 - 营销中心</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/antd@5.12.8/dist/reset.css" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body, #root { height: 100%; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background-color: #f0f2f5;
+    }
+    .app-layout { height: 100vh; }
+    .logo {
+      height: 48px; display: flex; align-items: center; justify-content: center;
+      color: #fff; font-size: 18px; font-weight: bold;
+    }
+    .site-layout-header {
+      background: #fff; padding: 0 24px; display: flex; align-items: center;
+      justify-content: space-between; box-shadow: 0 1px 4px rgba(0,21,41,.08);
+    }
+    .header-right { display: flex; align-items: center; gap: 16px; }
+    .community-name { font-size: 14px; color: #333; }
+    .user-info { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+    .site-layout-content {
+      margin: 0; background: #fff; padding: 0;
+      min-height: calc(100vh - 48px);
+    }
+    .breadcrumb-bar {
+      padding: 16px 24px; border-bottom: 1px solid #f0f0f0;
+      font-size: 14px; color: #666;
+    }
+    .breadcrumb-bar a { color: #1677ff; text-decoration: none; margin: 0 4px; }
+    .breadcrumb-bar .current { color: #333; margin-left: 4px; }
+    .config-page-content {
+      padding: 24px 48px;
+      max-width: 100%;
+    }
+    .create-btn-container { display: flex; justify-content: flex-end; margin-bottom: 16px; padding: 0 24px; }
+    .activity-type-cards {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 20px;
+    }
+    .activity-type-card {
+      border: 1px solid #e8e8e8; border-radius: 8px; padding: 32px 16px;
+      text-align: center; cursor: pointer; transition: all .3s; background: #fff;
+    }
+    .activity-type-card:hover {
+      border-color: #1677ff; box-shadow: 0 2px 8px rgba(22,119,255,.12);
+    }
+    .activity-type-card.selected { border-color: #1677ff; background: #e6f4ff; }
+    .activity-type-card .card-title { font-size: 16px; font-weight: 500; color: #333; margin-bottom: 8px; }
+    .activity-type-card .card-desc { font-size: 13px; color: #999; line-height: 1.5; }
+    .activity-type-modal .ant-modal-header { margin-bottom: 24px; }
+    .activity-type-modal .ant-modal-title { font-size: 16px; font-weight: 500; }
+    .activity-type-modal .ant-modal-body { padding: 24px; }
+    .modal-footer {
+      display: flex; justify-content: flex-end; gap: 8px;
+      padding-top: 16px; border-top: 1px solid #f0f0f0;
+    }
+    .modal-footer .ant-btn { height: 32px; padding: 0 16px; font-size: 14px; border-radius: 4px; }
+    .config-form-container { padding: 0; }
+
+    /* 表单样式 - 匹配参考页面 */
+    .simple-form {
+      max-width: 700px;
+    }
+    .form-item {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 24px;
+    }
+    .form-label {
+      width: 140px;
+      text-align: right;
+      padding-right: 12px;
+      padding-top: 5px;
+      font-size: 14px;
+      color: #333;
+      flex-shrink: 0;
+    }
+    .form-label.required::before {
+      content: '*';
+      color: #ff4d4f;
+      margin-right: 4px;
+    }
+    .form-control {
+      flex: 1;
+    }
+    .form-control input {
+      height: 36px;
+      width: 360px;
+      border: 1px solid #d9d9d9;
+      border-radius: 4px;
+      padding: 0 12px;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.3s;
+    }
+    .form-control input:focus {
+      border-color: #1677ff;
+      box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.1);
+    }
+    .form-control input::placeholder {
+      color: #bfbfbf;
+    }
+    .form-control textarea {
+      width: 360px;
+      border: 1px solid #d9d9d9;
+      border-radius: 4px;
+      padding: 8px 12px;
+      font-size: 14px;
+      outline: none;
+      resize: vertical;
+      font-family: inherit;
+    }
+    .form-control textarea:focus {
+      border-color: #1677ff;
+      box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.1);
+    }
+    .form-tip {
+      font-size: 12px;
+      color: #999;
+      margin-top: 8px;
+      line-height: 1.5;
+    }
+    .form-error {
+      font-size: 12px;
+      color: #ff4d4f;
+      margin-top: 4px;
+    }
+    .form-group-title {
+      font-size: 14px;
+      font-weight: bold;
+      color: #333;
+      margin: 32px 0 20px 0;
+    }
+
+    /* 时间选择器范围 */
+    .range-picker-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .range-picker-wrap input {
+      width: 180px;
+      cursor: pointer;
+    }
+    .range-picker-wrap .separator {
+      color: #999;
+    }
+
+    /* 单选按钮组 */
+    .radio-group {
+      display: flex;
+      gap: 24px;
+      padding-top: 5px;
+    }
+    .radio-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      color: #333;
+    }
+    .radio-dot {
+      width: 16px;
+      height: 16px;
+      border: 1px solid #d9d9d9;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s;
+    }
+    .radio-item.selected .radio-dot {
+      border-color: #1677ff;
+    }
+    .radio-item.selected .radio-dot::after {
+      content: '';
+      width: 8px;
+      height: 8px;
+      background: #1677ff;
+      border-radius: 50%;
+    }
+
+    /* 图片上传 - 正方形虚线框 */
+    .image-upload-box {
+      width: 100px;
+      height: 100px;
+      border: 1px dashed #d9d9d9;
+      border-radius: 4px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      background: #fafafa;
+      transition: border-color 0.3s;
+    }
+    .image-upload-box:hover {
+      border-color: #1677ff;
+    }
+    .upload-plus {
+      font-size: 28px;
+      color: #999;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+    .upload-text {
+      font-size: 12px;
+      color: #666;
+    }
+    .image-preview-box {
+      width: 100px;
+      height: 100px;
+      border: 1px solid #d9d9d9;
+      border-radius: 4px;
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+    }
+    .image-preview-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .image-preview-mask {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      opacity: 0;
+      transition: opacity 0.3s;
+      color: #fff;
+      font-size: 12px;
+    }
+    .image-preview-box:hover .image-preview-mask {
+      opacity: 1;
+    }
+    .image-preview-mask span {
+      cursor: pointer;
+    }
+
+    /* Banner上传 - 横向矩形 */
+    .banner-upload-box {
+      width: 320px;
+      height: 88px;
+      border: 1px dashed #d9d9d9;
+      border-radius: 4px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      background: #fafafa;
+      transition: border-color 0.3s;
+    }
+    .banner-upload-box:hover {
+      border-color: #1677ff;
+    }
+    .banner-preview-box {
+      width: 320px;
+      height: 88px;
+      border: 1px solid #d9d9d9;
+      border-radius: 4px;
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+    }
+    .banner-preview-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* 选择框 */
+    .select-wrap {
+      position: relative;
+      width: 360px;
+    }
+    .select-input {
+      width: 100%;
+      height: 36px;
+      border: 1px solid #d9d9d9;
+      border-radius: 4px;
+      padding: 0 30px 0 12px;
+      font-size: 14px;
+      outline: none;
+      cursor: pointer;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      color: #333;
+      transition: border-color 0.3s;
+    }
+    .select-input:hover {
+      border-color: #1677ff;
+    }
+    .select-input.placeholder {
+      color: #bfbfbf;
+    }
+    .select-arrow {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #999;
+      pointer-events: none;
+      font-size: 12px;
+    }
+    .select-dropdown {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      right: 0;
+      background: #fff;
+      border: 1px solid #f0f0f0;
+      border-radius: 4px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+      z-index: 1000;
+      max-height: 250px;
+      overflow-y: auto;
+    }
+    .select-dropdown-search {
+      padding: 8px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .select-dropdown-search input {
+      width: 100%;
+      height: 30px;
+      border: 1px solid #d9d9d9;
+      border-radius: 4px;
+      padding: 0 8px;
+      font-size: 13px;
+      outline: none;
+    }
+    .select-option {
+      padding: 8px 12px;
+      cursor: pointer;
+      font-size: 14px;
+      color: #333;
+    }
+    .select-option:hover {
+      background: #f5f5f5;
+    }
+    .select-option.selected {
+      background: #e6f4ff;
+      color: #1677ff;
+    }
+    .select-empty {
+      padding: 20px;
+      text-align: center;
+      color: #999;
+      font-size: 13px;
+    }
+
+    /* 底部按钮栏 */
+    .form-footer-bar {
+      position: fixed;
+      bottom: 0;
+      left: 200px;
+      right: 0;
+      background: #fff;
+      padding: 12px 48px;
+      border-top: 1px solid #f0f0f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 100;
+      transition: left 0.2s;
+    }
+    .ant-layout-sider-collapsed ~ .ant-layout .form-footer-bar {
+      left: 80px;
+    }
+    .footer-left {
+      /* 返回按钮 */
+    }
+    .footer-right {
+      display: flex;
+      gap: 12px;
+    }
+    .btn {
+      height: 36px;
+      padding: 0 20px;
+      border-radius: 4px;
+      font-size: 14px;
+      cursor: pointer;
+      border: 1px solid #d9d9d9;
+      background: #fff;
+      color: #333;
+      transition: all 0.3s;
+    }
+    .btn:hover {
+      border-color: #1677ff;
+      color: #1677ff;
+    }
+    .btn-primary {
+      background: #1677ff;
+      border-color: #1677ff;
+      color: #fff;
+    }
+    .btn-primary:hover {
+      background: #4096ff;
+      border-color: #4096ff;
+      color: #fff;
+    }
+    .btn-default {
+      background: #fff;
+    }
+
+    .table-row-striped { background: #fafafa; }
+    .status-dot {
+      display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 6px;
+    }
+    .ant-table-thead > tr > th { background: #fafafa !important; font-weight: 600; }
+    .ant-table-tbody > tr:hover > td { background: #e6f4ff !important; }
+    .page-transition { animation: fadeIn .3s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* 活动列表页padding调整 */
+    .list-page {
+      padding: 24px;
+    }
+    .list-result-tip {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 16px;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script crossorigin src="https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.production.min.js"></script>
+  <script crossorigin src="https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.10/dayjs.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/antd@5.12.8/dist/antd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.min.js"></script>
+  <script type="text/babel">
+    const { useState, useEffect, useRef, useMemo, createContext, useContext } = React;
+    const {
+      Layout, Menu, Breadcrumb, Avatar, Dropdown, Table, Button, Tag, Space,
+      Pagination, message, Popconfirm, Modal, Spin, Upload, Result, ConfigProvider,
+      Empty, InputNumber
+    } = antd;
+    const { Header, Content, Sider } = Layout;
+
+    // ==================== 常量定义 ====================
+    const ACTIVITY_TYPES = {
+      LOTTERY: 'lottery',
+      POSTER: 'poster',
+      THIRD_PARTY: 'third_party',
+    };
+
+    const ACTIVITY_TYPE_LABELS = {
+      lottery: '抽奖活动',
+      poster: '海报活动',
+      third_party: '第三方活动',
+    };
+
+    const ACTIVITY_TYPE_DESCRIPTIONS = {
+      lottery: '完成社区任务，赢取好礼或抽奖机会',
+      poster: '常规社区活动（仅展示活动海报）',
+      third_party: '跳转到第三方创建的活动落地页',
+    };
+
+    const ACTIVITY_STATUS = {
+      DRAFT: 'draft',
+      NOT_STARTED: 'not_started',
+      ONGOING: 'ongoing',
+      ENDED: 'ended',
+    };
+
+    const ACTIVITY_STATUS_LABELS = {
+      draft: '草稿',
+      not_started: '未开始',
+      ongoing: '进行中',
+      ended: '已结束',
+    };
+
+    // ==================== Mock数据 ====================
+    let mockActivities = [
+      { id: 12, activityName: '七夕活动', activityType: 'poster', topicId: 1, topicName: '共赴心动', startTime: '2026-08-05 15:27:23', endTime: '2026-08-09 15:27:23', displayStatus: true, status: 'ended', bannerUrl: 'https://picsum.photos/750/300?random=1', miniProgramPath: '', createTime: '2026-08-01 10:00:00' },
+      { id: 10, activityName: '0625抽奖活动', activityType: 'lottery', topicId: 2, topicName: '新款上市', startTime: '2026-06-25 14:33:58', endTime: '2026-06-30 14:33:58', displayStatus: true, status: 'ended', bannerUrl: 'https://picsum.photos/750/300?random=2', miniProgramPath: '', createTime: '2026-06-20 10:00:00' },
+      { id: 9, activityName: '有跳转的活动25', activityType: 'poster', topicId: 3, topicName: '马力全开', startTime: '2026-06-25 14:24:32', endTime: '2026-06-30 14:24:32', displayStatus: true, status: 'ended', bannerUrl: 'https://picsum.photos/750/300?random=3', miniProgramPath: '/pages/activity/detail?id=25', createTime: '2026-06-20 09:00:00' },
+      { id: 6, activityName: '海报活动0624', activityType: 'poster', topicId: 3, topicName: '马力全开', startTime: '2026-06-24 14:47:01', endTime: '2026-06-30 14:47:01', displayStatus: true, status: 'ended', bannerUrl: 'https://picsum.photos/750/300?random=4', miniProgramPath: '', createTime: '2026-06-20 08:00:00' },
+      { id: 4, activityName: '共赴心动', activityType: 'lottery', topicId: 1, topicName: '共赴心动', startTime: '2026-06-12 14:46:39', endTime: '2026-06-30 14:46:39', displayStatus: false, status: 'ended', bannerUrl: 'https://picsum.photos/750/300?random=5', miniProgramPath: '', createTime: '2026-06-10 10:00:00' },
+      { id: 2, activityName: '马力全开C好运', activityType: 'lottery', topicId: 3, topicName: '马力全开', startTime: '2026-06-11 15:04:34', endTime: '2026-06-30 15:04:34', displayStatus: true, status: 'ended', bannerUrl: 'https://picsum.photos/750/300?random=6', miniProgramPath: '', createTime: '2026-06-08 10:00:00' },
+      { id: 1, activityName: '城市达人计划', activityType: 'lottery', topicId: 4, topicName: '城市达人', startTime: '2026-06-11 14:53:05', endTime: '2026-06-12 10:53:05', displayStatus: true, status: 'ended', bannerUrl: 'https://picsum.photos/750/300?random=7', miniProgramPath: '', createTime: '2026-06-05 10:00:00' },
+    ];
+
+    const mockTopics = [
+      { id: 1, name: '共赴心动' },
+      { id: 2, name: '新款上市' },
+      { id: 3, name: '马力全开' },
+      { id: 4, name: '城市达人' },
+      { id: 5, name: '夏日狂欢' },
+      { id: 6, name: '周年庆典' },
+      { id: 7, name: '新人专享' },
+      { id: 8, name: '会员日' },
+    ];
+
+    let nextId = 13;
+
+    const delay = (ms = 500) => new Promise(resolve => setTimeout(resolve, ms));
+
+    const calcStatus = (startTime, endTime) => {
+      const now = dayjs();
+      const start = dayjs(startTime);
+      const end = dayjs(endTime);
+      if (now.isBefore(start)) return 'not_started';
+      if (now.isAfter(end)) return 'ended';
+      return 'ongoing';
+    };
+
+    // ==================== 路由Context ====================
+    const RouterContext = createContext();
+    const useRouter = () => useContext(RouterContext);
+
+    const RouterProvider = ({ children }) => {
+      const [route, setRoute] = useState({ path: '/marketing/activity/list', params: {} });
+
+      const navigate = (path, params = {}) => {
+        setRoute({ path, params });
+        window.scrollTo(0, 0);
+      };
+
+      return (
+        <RouterContext.Provider value={{ route, navigate }}>
+          {children}
+        </RouterContext.Provider>
+      );
+    };
+
+    // ==================== 布局Context（共享侧边栏折叠状态） ====================
+    const LayoutContext = createContext();
+    const useLayout = () => useContext(LayoutContext);
+
+    const LayoutProvider = ({ children }) => {
+      const [collapsed, setCollapsed] = useState(false);
+      return (
+        <LayoutContext.Provider value={{ collapsed, setCollapsed }}>
+          {children}
+        </LayoutContext.Provider>
+      );
+    };
+
+    // ==================== 简易表单组件 ====================
+    const SimpleFormItem = ({ label, required, error, tip, children, style }) => (
+      <div className="form-item" style={style}>
+        <div className={`form-label ${required ? 'required' : ''}`}>{label}</div>
+        <div className="form-control">
+          {children}
+          {error && <div className="form-error">{error}</div>}
+          {tip && <div className="form-tip">{tip}</div>}
+        </div>
+      </div>
+    );
+
+    // ==================== 自定义选择器组件 ====================
+    const SimpleSelect = ({ value, onChange, options, placeholder, showSearch = false }) => {
+      const [open, setOpen] = useState(false);
+      const [search, setSearch] = useState('');
+      const ref = useRef(null);
+
+      const filteredOptions = useMemo(() => {
+        if (!showSearch || !search) return options;
+        return options.filter(o => o.label.includes(search));
+      }, [options, search, showSearch]);
+
+      const selectedOption = options.find(o => o.value === value);
+
+      useEffect(() => {
+        const handleClickOutside = (e) => {
+          if (ref.current && !ref.current.contains(e.target)) {
+            setOpen(false);
+            setSearch('');
+          }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+      }, []);
+
+      return (
+        <div className="select-wrap" ref={ref}>
+          <div
+            className={`select-input ${!selectedOption ? 'placeholder' : ''}`}
+            onClick={() => setOpen(!open)}
+          >
+            {selectedOption ? selectedOption.label : placeholder}
+            <span className="select-arrow">▼</span>
+          </div>
+          {open && (
+            <div className="select-dropdown">
+              {showSearch && (
+                <div className="select-dropdown-search">
+                  <input
+                    placeholder="搜索"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    autoFocus
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                </div>
+              )}
+              {filteredOptions.length > 0 ? filteredOptions.map(opt => (
+                <div
+                  key={opt.value}
+                  className={`select-option ${value === opt.value ? 'selected' : ''}`}
+                  onClick={() => {
+                    onChange(opt.value);
+                    setOpen(false);
+                    setSearch('');
+                  }}
+                >
+                  {opt.label}
+                </div>
+              )) : (
+                <div className="select-empty">无匹配结果</div>
+              )}
+            </div>
+          )}
+        </div>
+      );
+    };
+
+    // ==================== 简易图片上传（正方形） ====================
+    const SimpleImageUpload = ({ value, onChange, tip, shape = 'square' }) => {
+      const [previewVisible, setPreviewVisible] = useState(false);
+      const [uploading, setUploading] = useState(false);
+      const fileInputRef = useRef(null);
+
+      const handleFileSelect = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        if (!file.type.startsWith('image/')) { message.error('只能上传图片文件！'); return; }
+        if (file.size / 1024 / 1024 > 2) { message.error('图片大小不能超过 2MB！'); return; }
+
+        setUploading(true);
+        message.loading({ content: '上传中...', key: 'upload' });
+        await delay(800);
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          onChange && onChange(ev.target.result);
+          message.success({ content: '上传成功', key: 'upload' });
+          setUploading(false);
+        };
+        reader.readAsDataURL(file);
+        e.target.value = '';
+      };
+
+      const handleDelete = (e) => {
+        e.stopPropagation();
+        Modal.confirm({
+          title: '确认删除',
+          content: '确定要删除这张图片吗？',
+          onOk: () => { onChange && onChange(''); },
+        });
+      };
+
+      const triggerSelect = (e) => {
+        e.stopPropagation();
+        fileInputRef.current && fileInputRef.current.click();
+      };
+
+      const boxClass = shape === 'banner' ? 'banner-upload-box' : 'image-upload-box';
+      const previewClass = shape === 'banner' ? 'banner-preview-box' : 'image-preview-box';
+
+      return (
+        <div>
+          <input ref={fileInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleFileSelect} />
+          {value ? (
+            <div className={previewClass} onClick={triggerSelect}>
+              <img src={value} alt="preview" />
+              <div className="image-preview-mask">
+                <span onClick={(e) => { e.stopPropagation(); setPreviewVisible(true); }}>预览</span>
+                <span onClick={handleDelete}>删除</span>
+              </div>
+            </div>
+          ) : uploading ? (
+            <div className={boxClass}><Spin size="small" /></div>
+          ) : (
+            <div className={boxClass} onClick={triggerSelect}>
+              <span className="upload-plus">+</span>
+              <span className="upload-text">上传图片</span>
+            </div>
+          )}
+          {tip && <div className="form-tip">{tip}</div>}
+          <Modal open={previewVisible} footer={null} onCancel={() => setPreviewVisible(false)} title="图片预览">
+            <img alt="preview" style={{ width: '100%' }} src={value} />
+          </Modal>
+        </div>
+      );
+    };
+
+    // ==================== 单选按钮组 ====================
+    const SimpleRadioGroup = ({ value, onChange, options }) => (
+      <div className="radio-group">
+        {options.map(opt => (
+          <div
+            key={opt.value}
+            className={`radio-item ${value === opt.value ? 'selected' : ''}`}
+            onClick={() => onChange(opt.value)}
+          >
+            <span className="radio-dot"></span>
+            <span>{opt.label}</span>
+          </div>
+        ))}
+      </div>
+    );
+
+    // ==================== 布局组件 ====================
+    const MainLayout = ({ children, breadcrumbTitle }) => {
+      const { collapsed, setCollapsed } = useLayout();
+      const { route, navigate } = useRouter();
+
+      const menuItems = [
+        {
+          key: 'marketing',
+          label: '营销',
+          children: [
+            { key: 'marketing-automation', label: '营销自动化' },
+            { key: 'authorization', label: '授权管理' },
+            { key: 'wechat-template', label: '微信模板管理' },
+            { key: 'sms-template', label: '短信模板' },
+            { key: 'coupon', label: '优惠券管理' },
+            {
+              key: 'activity',
+              label: '活动管理',
+              children: [
+                { key: '/marketing/activity/list', label: '活动列表' },
+                { key: 'prize-library', label: '奖品库' },
+                { key: 'prize-pool', label: '奖池管理' },
+                { key: 'winning-records', label: '中奖记录' },
+              ],
+            },
+          ],
+        },
+        { key: 'user', label: '用户' },
+        { key: 'content', label: '内容' },
+        { key: 'task', label: '任务' },
+        { key: 'data', label: '数据' },
+        { key: 'config', label: '配置' },
+        { key: 'system', label: '系统' },
+      ];
+
+      const handleMenuClick = ({ key }) => {
+        if (key.startsWith('/')) navigate(key);
+      };
+
+      return (
+        <Layout className="app-layout">
+          <Sider collapsible collapsed={collapsed} onCollapse={setCollapsed} theme="dark" width={200}>
+            <div className="logo">{!collapsed ? '微盟社区' : '微'}</div>
+            <Menu
+              theme="dark"
+              mode="inline"
+              selectedKeys={[route.path.startsWith('/marketing/activity') ? '/marketing/activity/list' : route.path]}
+              defaultOpenKeys={['marketing', 'activity']}
+              items={menuItems}
+              onClick={handleMenuClick}
+            />
+          </Sider>
+          <Layout>
+            <Header className="site-layout-header">
+              <div style={{ fontSize: '18px', fontWeight: 500 }}></div>
+              <div className="header-right">
+                <div className="community-name">微盟社区演示-英模会员社区</div>
+                <Dropdown menu={{ items: [
+                  { key: 'profile', label: '个人中心' },
+                  { key: 'settings', label: '账户设置' },
+                  { key: 'logout', label: '退出登录' },
+                ]}}>
+                  <div className="user-info">
+                    <Avatar size="small" style={{ backgroundColor: '#1677ff' }}>熊</Avatar>
+                    <span>小熊猫猫小熊猫猫</span>
+                    <span style={{ fontSize: '12px' }}>▼</span>
+                  </div>
+                </Dropdown>
+              </div>
+            </Header>
+            <Content style={{ background: '#fff' }}>
+              <div className="breadcrumb-bar">
+                <a onClick={() => navigate('/marketing/activity/list')}>🏠</a> /
+                <a onClick={() => navigate('/marketing/activity/list')}>营销中心</a> /
+                <a onClick={() => navigate('/marketing/activity/list')}>活动管理</a> /
+                <span className="current">{breadcrumbTitle || '活动列表'}</span>
+              </div>
+              <div className="page-transition" key={route.path + JSON.stringify(route.params)}>
+                {children}
+              </div>
+            </Content>
+          </Layout>
+        </Layout>
+      );
+    };
+
+    // ==================== 活动类型选择弹窗 ====================
+    const ActivityTypeModal = ({ open, onCancel, onConfirm }) => {
+      const [selectedType, setSelectedType] = useState(null);
+
+      const activityTypes = [
+        { type: ACTIVITY_TYPES.LOTTERY, title: '抽奖活动', desc: '完成社区任务，赢取好礼或抽奖机会' },
+        { type: ACTIVITY_TYPES.POSTER, title: '海报活动', desc: '常规社区活动（仅展示活动海报）' },
+        { type: ACTIVITY_TYPES.THIRD_PARTY, title: '第三方活动', desc: '跳转到第三方创建的活动落地页' },
+      ];
+
+      const handleCancel = () => { setSelectedType(null); onCancel && onCancel(); };
+      const handleConfirm = () => {
+        if (selectedType) { onConfirm && onConfirm(selectedType); setSelectedType(null); }
+      };
+
+      return (
+        <Modal title="选择活动类型" open={open} onCancel={handleCancel} footer={null} width={720} destroyOnClose className="activity-type-modal">
+          <div className="activity-type-cards">
+            {activityTypes.map((item) => (
+              <div
+                key={item.type}
+                className={`activity-type-card ${selectedType === item.type ? 'selected' : ''}`}
+                onClick={() => setSelectedType(item.type)}
+              >
+                <div className="card-title">{item.title}</div>
+                <div className="card-desc">{item.desc}</div>
+              </div>
+            ))}
+          </div>
+          <div className="modal-footer">
+            <Button onClick={handleCancel}>取消</Button>
+            <Button type="primary" disabled={!selectedType} onClick={handleConfirm}>
+              立即创建
+            </Button>
+          </div>
+        </Modal>
+      );
+    };
+
+    // ==================== 活动列表页面 ====================
+    const ActivityList = () => {
+      const { navigate } = useRouter();
+      const [modalVisible, setModalVisible] = useState(false);
+      const [currentPage, setCurrentPage] = useState(1);
+      const [pageSize, setPageSize] = useState(10);
+      const [loading, setLoading] = useState(false);
+      const [activities, setActivities] = useState([]);
+      const [total, setTotal] = useState(0);
+
+      const loadData = async () => {
+        setLoading(true);
+        await delay(400);
+        let list = mockActivities.map(a => ({ ...a, status: calcStatus(a.startTime, a.endTime) }));
+        setTotal(list.length);
+        const start = (currentPage - 1) * pageSize;
+        setActivities(list.slice(start, start + pageSize));
+        setLoading(false);
+      };
+
+      useEffect(() => { loadData(); }, [currentPage, pageSize]);
+
+      const handleSelectType = (type) => {
+        setModalVisible(false);
+        navigate('/marketing/activity/config', { type });
+      };
+
+      const handleView = (record) => {
+        navigate('/marketing/activity/config', { id: record.id, type: record.activityType });
+      };
+
+      const handleToggleDisplay = async (record) => {
+        const newStatus = !record.displayStatus;
+        const idx = mockActivities.findIndex(a => a.id === record.id);
+        if (idx !== -1) mockActivities[idx].displayStatus = newStatus;
+        setActivities(prev => prev.map(a => a.id === record.id ? { ...a, displayStatus: newStatus } : a));
+        message.success(newStatus ? '已开启显示' : '已关闭显示');
+      };
+
+      const handlePromote = (record) => {
+        message.info('推广活动：' + record.activityName);
+      };
+
+      const getStatusTag = (status) => {
+        const dotColors = { draft: '#d9d9d9', not_started: '#1677ff', ongoing: '#52c41a', ended: '#d9d9d9' };
+        return (
+          <span>
+            <span className="status-dot" style={{ backgroundColor: dotColors[status] }} />
+            {ACTIVITY_STATUS_LABELS[status]}
+          </span>
+        );
+      };
+
+      const getDisplayTag = (displayStatus) => (
+        <span style={{ color: displayStatus ? '#52c41a' : '#ff4d4f' }}>
+          {displayStatus ? '显示' : '不显示'}
+        </span>
+      );
+
+      const columns = [
+        { title: '活动编号', dataIndex: 'id', key: 'id', width: 100 },
+        { title: '活动名称', dataIndex: 'activityName', key: 'activityName', width: 180 },
+        { title: '话题名称', dataIndex: 'topicName', key: 'topicName', width: 120 },
+        {
+          title: '活动时间', key: 'activityTime', width: 220,
+          render: (_, r) => (<div><div>{r.startTime}</div><div style={{ color: '#999' }}>~</div><div>{r.endTime}</div></div>),
+        },
+        { title: '活动状态', dataIndex: 'status', key: 'status', width: 100, render: (s) => getStatusTag(s) },
+        { title: '小程序显示状态', dataIndex: 'displayStatus', key: 'displayStatus', width: 140, render: (d) => getDisplayTag(d) },
+        { title: '活动类型', dataIndex: 'activityType', key: 'activityType', width: 120, render: (t) => ACTIVITY_TYPE_LABELS[t] },
+        {
+          title: '操作', key: 'action', width: 200,
+          render: (_, record) => (
+            <Space size="small">
+              <a onClick={() => handleView(record)}>查看</a>
+              <Popconfirm
+                title={record.displayStatus ? '确定关闭显示吗？' : '确定开启显示吗？'}
+                onConfirm={() => handleToggleDisplay(record)}
+                okText="确定" cancelText="取消"
+              >
+                <a>{record.displayStatus ? '关闭显示' : '开启显示'}</a>
+              </Popconfirm>
+              <a onClick={() => handlePromote(record)}>推广</a>
+            </Space>
+          ),
+        },
+      ];
+
+      return (
+        <div className="list-page">
+          <div className="list-result-tip">结果：{total}条</div>
+          <div className="create-btn-container" style={{ padding: 0 }}>
+            <Button type="primary" size="large" onClick={() => setModalVisible(true)}>
+              + 创建活动
+            </Button>
+          </div>
+          <Table
+            columns={columns}
+            dataSource={activities}
+            rowKey="id"
+            loading={loading}
+            pagination={false}
+            style={{ background: '#fff' }}
+            rowClassName={(_, index) => index % 2 === 1 ? 'table-row-striped' : ''}
+          />
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '16px' }}>
+            <Pagination
+              current={currentPage}
+              pageSize={pageSize}
+              total={total}
+              showSizeChanger
+              showQuickJumper
+              showTotal={(t) => `共 ${t} 条`}
+              onChange={(page, size) => { setCurrentPage(page); setPageSize(size); }}
+            />
+          </div>
+          <ActivityTypeModal
+            open={modalVisible}
+            onCancel={() => setModalVisible(false)}
+            onConfirm={handleSelectType}
+          />
+        </div>
+      );
+    };
+
+    // ==================== 抽奖/海报活动占位 ====================
+    const PlaceholderConfig = ({ title }) => {
+      const { navigate } = useRouter();
+      return (
+        <div className="config-page-content">
+          <Result
+            status="info"
+            title={title}
+            subTitle="该活动类型配置功能开发中，敬请期待..."
+            extra={
+              <Button type="primary" onClick={() => navigate('/marketing/activity/list')}>
+                返回活动列表
+              </Button>
+            }
+          />
+        </div>
+      );
+    };
+
+    // ==================== 第三方活动配置页面（新版 - 匹配参考UI） ====================
+    const ThirdPartyConfig = ({ editId }) => {
+      const { navigate } = useRouter();
+      const { collapsed } = useLayout();
+      const [loading, setLoading] = useState(false);
+      const [submitting, setSubmitting] = useState(false);
+      const [isEdit, setIsEdit] = useState(false);
+
+      // 表单字段
+      const [activityName, setActivityName] = useState('');
+      const [startTime, setStartTime] = useState('');
+      const [endTime, setEndTime] = useState('');
+      const [bannerUrl, setBannerUrl] = useState('');
+      const [appId, setAppId] = useState('');
+      const [miniProgramPath, setMiniProgramPath] = useState('');
+      const [displayStatus, setDisplayStatus] = useState(true);
+
+      // 错误状态
+      const [errors, setErrors] = useState({});
+
+      useEffect(() => {
+        // 默认时间：当前到7天后
+        const now = dayjs();
+        setStartTime(now.format('YYYY-MM-DD HH:mm:ss'));
+        setEndTime(now.add(7, 'day').format('YYYY-MM-DD HH:mm:ss'));
+
+        if (editId) {
+          setIsEdit(true);
+          loadDetail(editId);
+        }
+      }, [editId]);
+
+      const loadDetail = async (id) => {
+        setLoading(true);
+        await delay(400);
+        const detail = mockActivities.find(a => a.id === Number(id));
+        if (detail) {
+          setActivityName(detail.activityName || '');
+          setStartTime(detail.startTime || '');
+          setEndTime(detail.endTime || '');
+          setBannerUrl(detail.bannerUrl || '');
+          setAppId(detail.appId || '');
+          setMiniProgramPath(detail.miniProgramPath || '');
+          setDisplayStatus(detail.displayStatus !== false);
+        }
+        setLoading(false);
+      };
+
+      const validate = () => {
+        const newErrors = {};
+        if (!activityName.trim()) newErrors.activityName = '请输入活动名称';
+        if (!startTime || !endTime) newErrors.activityTime = '请选择活动开始和结束时间';
+        if (!bannerUrl) newErrors.bannerUrl = '请上传活动列表banner';
+        if (!appId.trim()) {
+          newErrors.appId = '请输入小程序AppID';
+        } else if (appId.trim().length < 18 || appId.trim().length > 20) {
+          newErrors.appId = 'AppID格式不正确（通常为18-20位字符）';
+        }
+        if (!miniProgramPath.trim()) {
+          newErrors.miniProgramPath = '请输入跳转小程序路径';
+        } else if (!miniProgramPath.startsWith('/')) {
+          newErrors.miniProgramPath = '小程序路径必须以 / 开头';
+        }
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+      };
+
+      const handleSubmit = async () => {
+        if (!validate()) {
+          message.error('请完善必填项');
+          return;
+        }
+        setSubmitting(true);
+        try {
+          const data = {
+            activityName: activityName.trim(),
+            bannerUrl,
+            appId: appId.trim(),
+            miniProgramPath: miniProgramPath.trim(),
+            startTime,
+            endTime,
+            topicId: null,
+            topicName: '',
+            displayStatus,
+          };
+
+          await delay(600);
+
+          if (isEdit) {
+            const idx = mockActivities.findIndex(a => a.id === Number(editId));
+            if (idx !== -1) {
+              mockActivities[idx] = { ...mockActivities[idx], ...data };
+            }
+            message.success('活动更新成功');
+          } else {
+            const now = dayjs().format('YYYY-MM-DD HH:mm:ss');
+            mockActivities.unshift({
+              id: nextId++,
+              activityType: 'third_party',
+              status: 'not_started',
+              createTime: now,
+              ...data,
+            });
+            message.success('活动创建成功');
+          }
+          navigate('/marketing/activity/list');
+        } catch (error) {
+          message.error('操作失败');
+        } finally {
+          setSubmitting(false);
+        }
+      };
+
+      const handleSaveDraft = async () => {
+        // 草稿保存不做严格校验
+        setSubmitting(true);
+        try {
+          const data = {
+            activityName: activityName.trim() || '未命名第三方活动',
+            bannerUrl,
+            appId: appId.trim(),
+            miniProgramPath: miniProgramPath.trim(),
+            startTime,
+            endTime,
+            topicId: null,
+            topicName: '',
+            displayStatus,
+            status: 'draft',
+          };
+          await delay(500);
+          const now = dayjs().format('YYYY-MM-DD HH:mm:ss');
+          mockActivities.unshift({
+            id: nextId++,
+            activityType: 'third_party',
+            createTime: now,
+            ...data,
+          });
+          message.success('草稿保存成功');
+          navigate('/marketing/activity/list');
+        } catch (error) {
+          message.error('保存失败');
+        } finally {
+          setSubmitting(false);
+        }
+      };
+
+      const handleCancel = () => navigate('/marketing/activity/list');
+
+      // 时间选择 - 使用原生datetime-local简化交互
+      const handleStartTimeChange = (e) => {
+        const val = e.target.value;
+        if (val) {
+          setStartTime(dayjs(val).format('YYYY-MM-DD HH:mm:ss'));
+        } else {
+          setStartTime('');
+        }
+      };
+      const handleEndTimeChange = (e) => {
+        const val = e.target.value;
+        if (val) {
+          setEndTime(dayjs(val).format('YYYY-MM-DD HH:mm:ss'));
+        } else {
+          setEndTime('');
+        }
+      };
+
+      const formatDateTimeForInput = (str) => {
+        if (!str) return '';
+        return dayjs(str).format('YYYY-MM-DDTHH:mm');
+      };
+
+      if (loading) {
+        return (
+          <div style={{ textAlign: 'center', padding: '100px' }}>
+            <Spin size="large" />
+          </div>
+        );
+      }
+
+      return (
+        <>
+          <div className="config-page-content" style={{ paddingBottom: '80px' }}>
+            <div className="simple-form">
+
+              {/* 活动名称 */}
+              <SimpleFormItem label="活动名称" required error={errors.activityName}>
+                <input
+                  type="text"
+                  placeholder="请输入活动名称"
+                  value={activityName}
+                  onChange={(e) => { setActivityName(e.target.value); setErrors({ ...errors, activityName: '' }); }}
+                  maxLength={50}
+                />
+              </SimpleFormItem>
+
+              {/* 活动时间 */}
+              <SimpleFormItem label="活动时间" required error={errors.activityTime}>
+                <div className="range-picker-wrap">
+                  <input
+                    type="datetime-local"
+                    value={formatDateTimeForInput(startTime)}
+                    onChange={handleStartTimeChange}
+                  />
+                  <span className="separator">~</span>
+                  <input
+                    type="datetime-local"
+                    value={formatDateTimeForInput(endTime)}
+                    onChange={handleEndTimeChange}
+                  />
+                </div>
+              </SimpleFormItem>
+
+              {/* 活动列表banner */}
+              <SimpleFormItem
+                label="活动列表banner"
+                required
+                error={errors.bannerUrl}
+                tip="建议图片尺寸：750*270px；支持jpg、png图片格式"
+              >
+                <SimpleImageUpload
+                  value={bannerUrl}
+                  onChange={(url) => { setBannerUrl(url); setErrors({ ...errors, bannerUrl: '' }); }}
+                  shape="banner"
+                />
+              </SimpleFormItem>
+
+              {/* 分组标题 - 跳转配置 */}
+              <div className="form-group-title">banner跳转配置</div>
+
+              {/* 小程序AppID */}
+              <SimpleFormItem
+                label="小程序AppID"
+                required
+                error={errors.appId}
+                tip="请输入要跳转的目标小程序AppID"
+              >
+                <input
+                  type="text"
+                  placeholder="请输入小程序AppID"
+                  value={appId}
+                  onChange={(e) => { setAppId(e.target.value); setErrors({ ...errors, appId: '' }); }}
+                  maxLength={30}
+                />
+              </SimpleFormItem>
+
+              {/* 跳转小程序路径 */}
+              <SimpleFormItem
+                label="跳转路径"
+                required
+                error={errors.miniProgramPath}
+                tip="请输入跳转页面的小程序路径"
+              >
+                <input
+                  type="text"
+                  placeholder="请输入跳转页面的小程序路径"
+                  value={miniProgramPath}
+                  onChange={(e) => { setMiniProgramPath(e.target.value); setErrors({ ...errors, miniProgramPath: '' }); }}
+                />
+              </SimpleFormItem>
+
+            </div>
+          </div>
+
+          {/* 底部固定按钮栏 */}
+          <div className="form-footer-bar" style={{ left: collapsed ? 80 : 200 }}>
+            <div className="footer-left">
+              <button className="btn btn-default" onClick={handleCancel}>返回</button>
+            </div>
+            <div className="footer-right">
+              <button className="btn btn-primary" onClick={handleSubmit} disabled={submitting}>
+                {submitting ? '提交中...' : (isEdit ? '确认修改' : '确认')}
+              </button>
+            </div>
+          </div>
+        </>
+      );
+    };
+
+    // ==================== 活动配置容器 ====================
+    const ActivityConfig = ({ params }) => {
+      const activityType = params.type;
+      let title = '活动配置';
+      let content;
+
+      if (activityType === ACTIVITY_TYPES.LOTTERY) {
+        title = '创建抽奖活动';
+        content = <PlaceholderConfig title="抽奖活动配置" />;
+      } else if (activityType === ACTIVITY_TYPES.POSTER) {
+        title = '创建海报活动';
+        content = <PlaceholderConfig title="海报活动配置" />;
+      } else if (activityType === ACTIVITY_TYPES.THIRD_PARTY) {
+        title = params.id ? '编辑第三方活动' : '创建第三方活动';
+        content = <ThirdPartyConfig editId={params.id} />;
+      } else {
+        title = '活动列表';
+        content = <ActivityList />;
+      }
+
+      return <MainLayout breadcrumbTitle={title}>{content}</MainLayout>;
+    };
+
+    // ==================== 主App ====================
+    const App = () => {
+      return (
+        <ConfigProvider theme={{ token: { colorPrimary: '#1677ff', borderRadius: 4 } }}>
+          <LayoutProvider>
+            <RouterProvider>
+              <RouterContent />
+            </RouterProvider>
+          </LayoutProvider>
+        </ConfigProvider>
+      );
+    };
+
+    const RouterContent = () => {
+      const { route } = useRouter();
+
+      let content;
+      let title = '活动列表';
+      if (route.path === '/marketing/activity/list') {
+        content = <ActivityList />;
+      } else if (route.path === '/marketing/activity/config') {
+        return <ActivityConfig params={route.params} />;
+      } else {
+        content = <ActivityList />;
+      }
+
+      return <MainLayout breadcrumbTitle={title}>{content}</MainLayout>;
+    };
+
+    // ==================== 渲染 ====================
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>
