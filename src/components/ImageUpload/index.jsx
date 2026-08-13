@@ -1,31 +1,15 @@
 import React, { useState } from 'react'
-import { Upload, message, Modal } from 'antd'
-import { PlusOutlined, DeleteOutlined, EyeOutlined } from '@ant-design/icons'
+import { Upload, message, Modal, Spin } from 'antd'
+import { PlusOutlined } from '@ant-design/icons'
 import { useActivityStore } from '../../store/activityStore'
 
-const ImageUpload = ({ value, onChange, tip, aspectRatio = 750 / 300 }) => {
+// shape: 'square' (100x100) | 'banner' (320x88)
+const ImageUpload = ({ value, onChange, tip, shape = 'square' }) => {
   const [previewVisible, setPreviewVisible] = useState(false)
-  const [previewImage, setPreviewImage] = useState('')
+  const [uploading, setUploading] = useState(false)
   const uploadImage = useActivityStore(state => state.uploadImage)
 
-  const handleChange = async (info) => {
-    const { file } = info
-    
-    if (file.status === 'uploading') {
-      return
-    }
-
-    if (file.originFileObj) {
-      try {
-        message.loading({ content: '上传中...', key: 'upload' })
-        const result = await uploadImage(file.originFileObj)
-        onChange?.(result.url)
-        message.success({ content: '上传成功', key: 'upload' })
-      } catch (error) {
-        message.error({ content: '上传失败', key: 'upload' })
-      }
-    }
-  }
+  const isBanner = shape === 'banner'
 
   const handleDelete = (e) => {
     e.stopPropagation()
@@ -38,93 +22,78 @@ const ImageUpload = ({ value, onChange, tip, aspectRatio = 750 / 300 }) => {
     })
   }
 
-  const handlePreview = () => {
-    setPreviewImage(value)
+  const handlePreview = (e) => {
+    e.stopPropagation()
     setPreviewVisible(true)
   }
 
-  const uploadButton = (
-    <div className="upload-placeholder">
-      <PlusOutlined />
-      <div className="upload-text">上传图片</div>
-    </div>
-  )
-
-  const beforeUpload = (file) => {
+  const beforeUpload = async (file) => {
     const isImage = file.type.startsWith('image/')
     if (!isImage) {
       message.error('只能上传图片文件！')
-      return false
+      return Upload.LIST_IGNORE
     }
     const isLt2M = file.size / 1024 / 1024 < 2
     if (!isLt2M) {
       message.error('图片大小不能超过 2MB！')
-      return false
+      return Upload.LIST_IGNORE
     }
+
+    // 直接在 beforeUpload 中处理上传
+    setUploading(true)
+    try {
+      message.loading({ content: '上传中...', key: 'upload' })
+      const result = await uploadImage(file)
+      onChange?.(result.url)
+      message.success({ content: '上传成功', key: 'upload' })
+    } catch (error) {
+      message.error({ content: '上传失败', key: 'upload' })
+    } finally {
+      setUploading(false)
+    }
+    // 返回 false 阻止 antd 自动上传
     return false
   }
+
+  const boxClass = isBanner ? 'banner-upload-box' : 'image-upload-box'
+  const previewClass = isBanner ? 'banner-preview-box' : 'image-preview-box'
 
   return (
     <div className="image-upload-container">
       <Upload
         name="file"
-        listType="picture-card"
         showUploadList={false}
         beforeUpload={beforeUpload}
-        onChange={handleChange}
         accept="image/*"
+        openFileDialogOnClick={true}
       >
         {value ? (
-          <div style={{ position: 'relative', width: '100%', height: '100%' }}>
-            <img
-              src={value}
-              alt="banner"
-              style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px' }}
-            />
-            <div
-              style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                background: 'rgba(0,0,0,0.5)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '16px',
-                opacity: 0,
-                transition: 'opacity 0.3s',
-                borderRadius: '8px',
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.opacity = 1}
-              onMouseLeave={(e) => e.currentTarget.style.opacity = 0}
-            >
-              <EyeOutlined
-                style={{ fontSize: '20px', color: '#fff', cursor: 'pointer' }}
-                onClick={(e) => {
-                  e.stopPropagation()
-                  handlePreview()
-                }}
-              />
-              <DeleteOutlined
-                style={{ fontSize: '20px', color: '#fff', cursor: 'pointer' }}
-                onClick={handleDelete}
-              />
+          <div className={previewClass} onClick={(e) => e.stopPropagation()}>
+            <img src={value} alt="preview" />
+            <div className="image-preview-mask">
+              <span onClick={handlePreview}>预览</span>
+              <span onClick={handleDelete}>删除</span>
             </div>
           </div>
+        ) : uploading ? (
+          <div className={boxClass}>
+            <Spin size="small" />
+          </div>
         ) : (
-          uploadButton
+          <div className={boxClass}>
+            <PlusOutlined className="upload-plus" />
+            <span className="upload-text">上传图片</span>
+          </div>
         )}
       </Upload>
-      {tip && <div className="upload-tip">{tip}</div>}
+      {tip && <div className="form-tip">{tip}</div>}
       <Modal
         open={previewVisible}
         footer={null}
         onCancel={() => setPreviewVisible(false)}
         title="图片预览"
       >
-        <img alt="preview" style={{ width: '100%' }} src={previewImage} />
+        <img alt="preview" style={{ width: '100%' }} src={value} />
       </Modal>
     </div>
   )

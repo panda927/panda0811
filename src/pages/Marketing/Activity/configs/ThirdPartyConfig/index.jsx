@@ -1,35 +1,37 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import {
-  Form,
-  Input,
-  DatePicker,
-  Select,
-  Button,
-  message,
-  Card,
-  Spin,
-} from 'antd'
+import { Form, Input, Button, message, Spin, DatePicker } from 'antd'
 import dayjs from 'dayjs'
 import ImageUpload from '../../../../../components/ImageUpload'
 import { useActivityStore } from '../../../../../store/activityStore'
 import { ACTIVITY_STATUS } from '../../../../../constants/activityTypes'
 
-const { RangePicker } = DatePicker
-const { Option } = Select
-const { TextArea } = Input
+// 适配 antd Form 的日期选择组件
+const DateTimePicker = ({ value, onChange }) => {
+  return (
+    <DatePicker
+      showTime
+      format="YYYY-MM-DD HH:mm:ss"
+      value={value ? dayjs(value) : null}
+      onChange={(val) => {
+        onChange?.(val ? val.format('YYYY-MM-DD HH:mm:ss') : '')
+      }}
+      allowClear
+      placeholder="请选择时间"
+      className="datetime-picker"
+    />
+  )
+}
 
+// 第三方活动配置页面（匹配参考UI）
 const ThirdPartyConfig = () => {
-  const [form] = Form.useForm()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
+  const [form] = Form.useForm()
   const [loading, setLoading] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [isEdit, setIsEdit] = useState(false)
 
-  const topicList = useActivityStore(state => state.topicList)
-  const topicLoading = useActivityStore(state => state.topicLoading)
-  const fetchTopicList = useActivityStore(state => state.fetchTopicList)
   const createThirdPartyActivity = useActivityStore(state => state.createThirdPartyActivity)
   const updateActivity = useActivityStore(state => state.updateActivity)
   const fetchActivityDetail = useActivityStore(state => state.fetchActivityDetail)
@@ -37,37 +39,32 @@ const ThirdPartyConfig = () => {
   const activityId = searchParams.get('id')
 
   useEffect(() => {
-    loadTopics()
+    // 默认时间：当前到7天后
+    const now = dayjs()
+    form.setFieldsValue({
+      startTime: now.format('YYYY-MM-DD HH:mm:ss'),
+      endTime: now.add(7, 'day').format('YYYY-MM-DD HH:mm:ss'),
+      displayStatus: true,
+    })
+
     if (activityId) {
       setIsEdit(true)
-      loadActivityDetail(activityId)
-    } else {
-      form.setFieldsValue({
-        activityTime: [dayjs(), dayjs().add(7, 'day')],
-      })
+      loadDetail(activityId)
     }
   }, [activityId])
 
-  const loadTopics = async () => {
-    try {
-      await fetchTopicList()
-    } catch (error) {
-      message.error('加载话题列表失败')
-    }
-  }
-
-  const loadActivityDetail = async (id) => {
+  const loadDetail = async (id) => {
     setLoading(true)
     try {
       const detail = await fetchActivityDetail(id)
       form.setFieldsValue({
-        activityName: detail.activityName,
-        bannerUrl: detail.bannerUrl,
-        miniProgramPath: detail.miniProgramPath,
-        activityTime: detail.startTime && detail.endTime
-          ? [dayjs(detail.startTime), dayjs(detail.endTime)]
-          : undefined,
-        topicId: detail.topicId,
+        activityName: detail.activityName || '',
+        startTime: detail.startTime || '',
+        endTime: detail.endTime || '',
+        bannerUrl: detail.bannerUrl || '',
+        appId: detail.appId || '',
+        miniProgramPath: detail.miniProgramPath || '',
+        displayStatus: detail.displayStatus !== false,
       })
     } catch (error) {
       message.error('加载活动详情失败')
@@ -76,72 +73,67 @@ const ThirdPartyConfig = () => {
     }
   }
 
-  const handleSubmit = async (values, isDraft = false) => {
-    setSubmitting(true)
-    try {
-      const [startTime, endTime] = values.activityTime
-      const selectedTopic = topicList.find(t => t.id === values.topicId)
-
-      const data = {
-        activityName: values.activityName,
-        bannerUrl: values.bannerUrl,
-        miniProgramPath: values.miniProgramPath,
-        startTime: startTime.format('YYYY-MM-DD HH:mm:ss'),
-        endTime: endTime.format('YYYY-MM-DD HH:mm:ss'),
-        topicId: values.topicId,
-        topicName: selectedTopic?.name || '',
-        status: isDraft ? ACTIVITY_STATUS.DRAFT : undefined,
-      }
-
-      if (isEdit) {
-        await updateActivity(activityId, data)
-        message.success('活动更新成功')
-      } else {
-        await createThirdPartyActivity(data)
-        message.success(isDraft ? '草稿保存成功' : '活动创建成功')
-      }
-
-      navigate('/marketing/activity/list')
-    } catch (error) {
-      message.error(isEdit ? '更新失败' : '创建失败')
-    } finally {
-      setSubmitting(false)
+  const validateAppId = (_, value) => {
+    if (!value || !value.trim()) {
+      return Promise.resolve()
     }
-  }
-
-  const handlePublish = () => {
-    form.validateFields().then(values => {
-      handleSubmit(values, false)
-    })
-  }
-
-  const handleSaveDraft = () => {
-    form.validateFields().then(values => {
-      handleSubmit(values, true)
-    })
-  }
-
-  const handleCancel = () => {
-    navigate('/marketing/activity/list')
-  }
-
-  const handleTopicSearch = (value) => {
-    fetchTopicList({ keyword: value })
+    const len = value.trim().length
+    if (len < 18 || len > 20) {
+      return Promise.reject(new Error('AppID格式不正确（通常为18-20位字符）'))
+    }
+    return Promise.resolve()
   }
 
   const validateMiniProgramPath = (_, value) => {
-    if (!value) {
-      return Promise.resolve()
+    if (!value || !value.trim()) {
+      return Promise.reject(new Error('请输入跳转小程序路径'))
     }
-    if (!value.startsWith('/')) {
+    if (!value.trim().startsWith('/')) {
       return Promise.reject(new Error('小程序路径必须以 / 开头'))
     }
     return Promise.resolve()
   }
 
-  const disabledDate = (current) => {
-    return current && current < dayjs().startOf('day')
+  const buildPayload = (values, isDraft = false) => {
+    return {
+      activityName: (values.activityName || '').trim() || '未命名第三方活动',
+      bannerUrl: values.bannerUrl,
+      appId: (values.appId || '').trim(),
+      miniProgramPath: (values.miniProgramPath || '').trim(),
+      startTime: values.startTime,
+      endTime: values.endTime,
+      topicId: null,
+      topicName: '',
+      displayStatus: values.displayStatus !== false,
+      status: isDraft ? ACTIVITY_STATUS.DRAFT : undefined,
+    }
   }
+
+  const handleSubmit = async () => {
+    try {
+      const values = await form.validateFields()
+      setSubmitting(true)
+      const data = buildPayload(values, false)
+      if (isEdit) {
+        await updateActivity(activityId, data)
+        message.success('活动更新成功')
+      } else {
+        await createThirdPartyActivity(data)
+        message.success('活动创建成功')
+      }
+      navigate('/marketing/activity/list')
+    } catch (error) {
+      if (error?.errorFields) {
+        message.error('请完善必填项')
+      } else {
+        message.error(isEdit ? '更新失败' : '创建失败')
+      }
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  const handleCancel = () => navigate('/marketing/activity/list')
 
   if (loading) {
     return (
@@ -152,117 +144,110 @@ const ThirdPartyConfig = () => {
   }
 
   return (
-    <div className="config-form-container">
-      <Card title={isEdit ? '编辑第三方活动' : '创建第三方活动'} bordered={false}>
-        <Form
-          form={form}
-          layout="horizontal"
-          labelCol={{ span: 6 }}
-          wrapperCol={{ span: 14 }}
-          initialValues={{}}
-        >
+    <>
+      <div className="config-page-content" style={{ paddingBottom: '80px' }}>
+        <Form form={form} layout="horizontal" className="simple-form" requiredMark="required">
+          {/* 活动名称 */}
           <Form.Item
             name="activityName"
             label="活动名称"
-            rules={[
-              { required: true, message: '请输入活动名称' },
-              { max: 50, message: '活动名称不能超过50个字符' },
-            ]}
+            rules={[{ required: true, message: '请输入活动名称' }]}
+            className="simple-form-item"
           >
-            <Input placeholder="请输入活动名称" size="large" />
+            <Input
+              placeholder="请输入活动名称"
+              maxLength={50}
+              className="form-input"
+            />
           </Form.Item>
 
+          {/* 活动时间 */}
+          <Form.Item
+            label="活动时间"
+            required
+            className="simple-form-item"
+          >
+            <div className="range-picker-wrap">
+              <Form.Item
+                name="startTime"
+                noStyle
+                rules={[{ required: true, message: '请选择开始时间' }]}
+              >
+                <DateTimePicker />
+              </Form.Item>
+              <span className="separator">~</span>
+              <Form.Item
+                name="endTime"
+                noStyle
+                rules={[{ required: true, message: '请选择结束时间' }]}
+              >
+                <DateTimePicker />
+              </Form.Item>
+            </div>
+          </Form.Item>
+
+          {/* 活动列表banner */}
           <Form.Item
             name="bannerUrl"
             label="活动列表banner"
-            rules={[{ required: true, message: '请上传活动banner' }]}
+            rules={[{ required: true, message: '请上传活动列表banner' }]}
+            className="simple-form-item"
+            extra="建议图片尺寸：750*270px；支持jpg、png图片格式"
           >
-            <ImageUpload
-              tip="建议尺寸 750x300px，支持JPG/PNG格式，大小不超过2MB"
-            />
+            <ImageUpload shape="banner" />
           </Form.Item>
 
+          {/* 分组标题 - 跳转配置 */}
+          <div className="form-group-title">banner跳转配置</div>
+
+          {/* 小程序AppID */}
           <Form.Item
-            name="miniProgramPath"
-            label="跳转小程序路径"
-            rules={[
-              { required: true, message: '请输入跳转小程序路径' },
-              { validator: validateMiniProgramPath },
-            ]}
-            extra="请填写小程序内的跳转路径，例如：/pages/activity/index?id=123"
+            name="appId"
+            label="小程序AppID"
+            rules={[{ validator: validateAppId }]}
+            className="simple-form-item"
+            extra="请输入要跳转的目标小程序AppID"
           >
             <Input
-              placeholder="请输入小程序页面路径，例如：/pages/activity/index?id=123"
-              size="large"
+              placeholder="请输入小程序AppID"
+              maxLength={30}
+              className="form-input"
             />
           </Form.Item>
 
+          {/* 跳转路径 */}
           <Form.Item
-            name="activityTime"
-            label="活动时间"
-            rules={[{ required: true, message: '请选择活动开始和结束时间' }]}
+            name="miniProgramPath"
+            label="跳转路径"
+            rules={[{ required: true, message: '请输入跳转路径' }, { validator: validateMiniProgramPath }]}
+            className="simple-form-item"
+            extra="请输入跳转页面的小程序路径"
           >
-            <RangePicker
-              showTime={{
-                format: 'HH:mm:ss',
-              }}
-              format="YYYY-MM-DD HH:mm:ss"
-              size="large"
-              style={{ width: '100%' }}
-              disabledDate={disabledDate}
-              placeholder={['开始时间', '结束时间']}
+            <Input
+              placeholder="请输入跳转页面的小程序路径"
+              className="form-input"
             />
-          </Form.Item>
-
-          <Form.Item
-            name="topicId"
-            label="关联话题"
-            rules={[{ required: true, message: '请选择关联话题' }]}
-          >
-            <Select
-              placeholder="请选择关联话题"
-              size="large"
-              showSearch
-              loading={topicLoading}
-              filterOption={false}
-              onSearch={handleTopicSearch}
-              notFoundContent={topicLoading ? <Spin size="small" /> : null}
-            >
-              {topicList.map(topic => (
-                <Option key={topic.id} value={topic.id}>
-                  {topic.name}
-                </Option>
-              ))}
-            </Select>
-          </Form.Item>
-
-          <Form.Item
-            wrapperCol={{ offset: 6, span: 14 }}
-          >
-            <div className="form-footer">
-              <Button size="large" onClick={handleCancel}>
-                取消
-              </Button>
-              <Button
-                size="large"
-                onClick={handleSaveDraft}
-                loading={submitting}
-              >
-                保存草稿
-              </Button>
-              <Button
-                type="primary"
-                size="large"
-                onClick={handlePublish}
-                loading={submitting}
-              >
-                {isEdit ? '保存修改' : '立即发布'}
-              </Button>
-            </div>
           </Form.Item>
         </Form>
-      </Card>
-    </div>
+      </div>
+
+      {/* 底部固定按钮栏 */}
+      <div className="form-footer-bar">
+        <div className="footer-right">
+          <Button className="btn-default" onClick={handleCancel}>
+            返回
+          </Button>
+          <Button
+            type="primary"
+            className="btn-primary"
+            onClick={handleSubmit}
+            loading={submitting}
+          >
+            {isEdit ? '确认修改' : '确认'}
+          </Button>
+        </div>
+      </div>
+    </>
   )
 }
 

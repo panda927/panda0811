@@ -29,6 +29,7 @@ let mockActivities = [
     displayStatus: DISPLAY_STATUS.SHOW,
     status: ACTIVITY_STATUS.ENDED,
     bannerUrl: 'https://picsum.photos/750/300?random=2',
+    appId: '',
     miniProgramPath: '',
     createTime: '2026-06-20 10:00:00',
   },
@@ -99,6 +100,7 @@ let mockActivities = [
     displayStatus: DISPLAY_STATUS.SHOW,
     status: ACTIVITY_STATUS.ENDED,
     bannerUrl: 'https://picsum.photos/750/300?random=7',
+    appId: '',
     miniProgramPath: '',
     createTime: '2026-06-05 10:00:00',
   },
@@ -234,9 +236,8 @@ export const activityApi = {
 
   async uploadImage(file) {
     await delay(1000)
-    const randomId = Math.floor(Math.random() * 1000)
     return {
-      url: `https://picsum.photos/750/300?random=${randomId}`,
+      url: URL.createObjectURL(file),
       name: file.name || 'banner.jpg',
     }
   },

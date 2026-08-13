@@ -45,9 +45,9 @@ const ActivityTypeModal = ({ open, onCancel, onConfirm }) => {
       open={open}
       onCancel={handleCancel}
       footer={null}
-      width={800}
+      width={720}
       className="activity-type-modal"
-      destroyOnClose
+      destroyOnHidden
     >
       <div className="activity-type-cards">
         {activityTypes.map((item) => (
@@ -62,12 +62,11 @@ const ActivityTypeModal = ({ open, onCancel, onConfirm }) => {
         ))}
       </div>
       <div className="modal-footer">
-        <Button size="large" onClick={handleCancel}>
+        <Button onClick={handleCancel}>
           取消
         </Button>
         <Button
           type="primary"
-          size="large"
           disabled={!selectedType}
           onClick={handleConfirm}
         >

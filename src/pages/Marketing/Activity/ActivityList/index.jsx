@@ -197,20 +197,18 @@ const ActivityList = () => {
           bordered={false}
           rowClassName={(record, index) => index % 2 === 1 ? 'table-row-striped' : ''}
         />
-        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '16px' }}>
-          <Pagination
-            current={currentPage}
-            pageSize={pageSize}
-            total={total}
-            showSizeChanger
-            showQuickJumper
-            showTotal={(total) => `共 ${total} 条`}
-            onChange={(page, size) => {
-              setCurrentPage(page)
-              setPageSize(size)
-            }}
-          />
-        </div>
+        <Pagination
+          current={currentPage}
+          pageSize={pageSize}
+          total={total}
+          showSizeChanger
+          showQuickJumper
+          showTotal={(total) => `共 ${total} 条`}
+          onChange={(page, size) => {
+            setCurrentPage(page)
+            setPageSize(size)
+          }}
+        />
       </div>
       <ActivityTypeModal
         open={modalVisible}

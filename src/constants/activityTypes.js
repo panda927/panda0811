@@ -13,7 +13,7 @@ export const ACTIVITY_TYPE_LABELS = {
 export const ACTIVITY_TYPE_DESCRIPTIONS = {
   [ACTIVITY_TYPES.LOTTERY]: '完成社区任务，赢取好礼或抽奖机会',
   [ACTIVITY_TYPES.POSTER]: '常规社区活动（仅展示活动海报）',
-  [ACTIVITY_TYPES.THIRD_PARTY]: '跳转到第三方小程序的活动',
+  [ACTIVITY_TYPES.THIRD_PARTY]: '跳转到第三方创建的活动落地页',
 }
 
 export const ACTIVITY_STATUS = {
