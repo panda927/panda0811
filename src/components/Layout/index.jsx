@@ -14,6 +14,8 @@ import {
   MobileOutlined,
   TrophyOutlined,
   RightOutlined,
+  PieChartOutlined,
+  DownloadOutlined,
 } from '@ant-design/icons'
 
 // 顶部一级导航(对照 ui-standard.html)
@@ -22,6 +24,7 @@ const topNavItems = [
   { key: 'content', label: '内容', icon: <FileTextOutlined /> },
   { key: 'activity', label: '活动', icon: <ScheduleOutlined /> },
   { key: 'marketing', label: '营销', icon: <BarChartOutlined /> },
+  { key: 'data', label: '数据', icon: <PieChartOutlined /> },
   { key: 'config', label: '配置', icon: <SettingOutlined /> },
   { key: 'system', label: '系统', icon: <DesktopOutlined /> },
 ]
@@ -61,6 +64,9 @@ const sideMenuConfig = {
     { key: 'activity-template', label: '活动模板', icon: <ScheduleOutlined /> },
     { key: 'activity-data', label: '活动数据', icon: <ScheduleOutlined /> },
   ],
+  data: [
+    { key: '/data/reports', label: '报表下载', icon: <DownloadOutlined /> },
+  ],
   config: [
     { key: 'system-config', label: '系统配置', icon: <SettingOutlined /> },
     { key: 'message-config', label: '消息配置', icon: <SettingOutlined /> },
@@ -78,6 +84,7 @@ const MainLayout = () => {
   const location = useLocation()
   // 根据当前路由推断选中的一级导航
   const getInitialTopNav = () => {
+    if (location.pathname.startsWith('/data')) return 'data'
     if (location.pathname.startsWith('/marketing')) return 'marketing'
     return 'marketing'
   }
@@ -89,6 +96,7 @@ const MainLayout = () => {
   const getActiveSideKey = () => {
     if (location.pathname.includes('/marketing/activity/list')) return '/marketing/activity/list'
     if (location.pathname.includes('/marketing/activity/config')) return '/marketing/activity/list'
+    if (location.pathname.includes('/data/reports')) return '/data/reports'
     return ''
   }
 
@@ -98,6 +106,9 @@ const MainLayout = () => {
       items.push({ title: '活动列表' })
     } else if (location.pathname.includes('/config')) {
       items.push({ title: '活动配置' })
+    } else if (location.pathname.includes('/data/reports')) {
+      items.length = 0
+      items.push({ title: '数据' }, { title: '报表下载' })
     }
     return items
   }

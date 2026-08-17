@@ -211,7 +211,7 @@ body {
   border-bottom: 1px solid var(--border-color);
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: var(--spacing-md);
   padding: 0 var(--spacing-xl);
   position: sticky;
   top: 0;
@@ -223,6 +223,7 @@ body {
   gap: var(--spacing-xs);
   height: 100%;
   align-items: center;
+  flex: 1;
 }
 
 .nav-item {
@@ -828,6 +829,184 @@ body {
     border-color: var(--primary-hover);
     color: #fff;
   }
+}
+
+/* ===== 报表下载页面 ===== */
+.report-page-content {
+  padding: var(--spacing-lg) 0;
+}
+
+.report-search-bar {
+  display: flex;
+  align-items: center;
+  margin-bottom: var(--spacing-lg);
+}
+
+.report-search-label {
+  font-size: var(--font-size-base);
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-right: var(--spacing-sm);
+  white-space: nowrap;
+}
+
+.report-search-group {
+  display: flex !important;
+  width: 280px;
+  border-radius: var(--border-radius-base);
+  overflow: hidden;
+}
+
+.report-search-input {
+  flex: 1;
+  border-right: none !important;
+  border-radius: var(--border-radius-base) 0 0 var(--border-radius-base) !important;
+  font-size: var(--font-size-base) !important;
+  height: 32px !important;
+}
+
+.report-search-btn {
+  border-radius: 0 var(--border-radius-base) var(--border-radius-base) 0 !important;
+  padding: 0 var(--spacing-lg) !important;
+  font-size: var(--font-size-base) !important;
+  height: 32px !important;
+}
+
+.report-empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: var(--spacing-xxl) 0;
+  color: var(--text-tertiary);
+  font-size: var(--font-size-base);
+}
+
+.report-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-xl);
+}
+
+.report-card {
+  position: relative;
+  background: var(--bg-container);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  transition: box-shadow 0.3s, transform 0.3s;
+  border: 1px solid var(--border-light);
+
+  &:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-4px);
+  }
+}
+
+.report-card-accent {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+}
+
+.report-card--excel .report-card-accent {
+  background: linear-gradient(180deg, #52C41A 0%, #95DE64 100%);
+}
+
+.report-card--ppt .report-card-accent {
+  background: linear-gradient(180deg, #FA8C16 0%, #FFC53D 100%);
+}
+
+.report-card-header {
+  padding: var(--spacing-md) var(--spacing-lg) 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.report-card-format {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px var(--spacing-sm);
+  height: 22px;
+  font-size: var(--font-size-xs);
+  border-radius: var(--border-radius-sm);
+  border: 1px solid;
+  font-weight: 500;
+
+  .anticon {
+    font-size: 12px;
+  }
+}
+
+.report-card-body {
+  padding: var(--spacing-md) var(--spacing-lg);
+  min-height: 72px;
+  display: flex;
+  align-items: center;
+}
+
+.report-card-title {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.report-card-desc {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.report-card-footer {
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-top: 1px solid var(--border-light);
+  display: flex;
+  justify-content: center;
+}
+
+.report-card-download-btn {
+  min-width: 96px;
+}
+
+/* 月份选择器弹出层 */
+.ant-picker-month .ant-picker-panel {
+  min-width: auto;
+}
+
+/* 报表下载弹窗 */
+.report-modal-content {
+  padding: var(--spacing-sm) 0;
+}
+
+.report-modal-info {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-xl);
+  padding: var(--spacing-md) var(--spacing-lg);
+  background: var(--bg-sider);
+  border-radius: var(--border-radius-lg);
+}
+
+.report-modal-name {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.report-modal-picker {
+  padding: var(--spacing-sm) 0;
+}
+
+.report-modal-tip {
+  margin-top: var(--spacing-sm);
+  font-size: var(--font-size-xs);
+  color: var(--text-tertiary);
+  text-align: left;
 }
 
 
